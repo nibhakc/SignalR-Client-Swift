@@ -192,26 +192,19 @@ public class WebsocketsTransport: NSObject, Transport, URLSessionWebSocketDelega
     }
 
     private func convertUrl(url: URL) -> URL {
-        if var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
-            if components.scheme == "http" {
-                components.scheme = "ws"
-            } else if components.scheme == "https" {
-                components.scheme = "wss"
-            }
-
-            // ✅ Inject SessionId from original URL if present
-            if let originalQueryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
-                if components.queryItems == nil {
-                    components.queryItems = []
-                }
-                components.queryItems?.append(contentsOf: originalQueryItems)
-            }
-
-            return components.url!
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        if components?.scheme == "http" {
+            components?.scheme = "ws"
+        } else if components?.scheme == "https" {
+            components?.scheme = "wss"
         }
-
-        return url
+        guard let finalUrl = components?.url else {
+            fatalError("❌ Invalid WebSocket URL after conversion: \(url.absoluteString)")
+        }
+        print("✅ Final WebSocket URL: \(finalUrl.absoluteString)")
+        return finalUrl
     }
+
 
 
     @inline(__always) private func populateHeaders(headers: [String: String], request: inout URLRequest) {
